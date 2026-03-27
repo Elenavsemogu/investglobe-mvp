@@ -18,8 +18,8 @@
   --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,sans-serif;
   --mono:'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;
 }
-html{scroll-behavior:smooth;font-size:16px}
-body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+html{scroll-behavior:smooth;font-size:16px;overflow-x:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;width:100%;max-width:100vw}
 a{color:var(--gold);text-decoration:none}
 a:hover{color:var(--gold2)}
 
@@ -47,7 +47,7 @@ h3{font-size:1.15rem;font-weight:600;color:#fff;margin-bottom:.5rem}
 
 /* HERO */
 #hero{display:flex;flex-direction:column;justify-content:center;padding-top:80px;position:relative}
-#hero::after{content:'';position:absolute;top:0;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(212,168,67,.06) 0%,transparent 70%);pointer-events:none}
+#hero::after{content:'';position:absolute;top:0;right:0;width:min(600px,80vw);height:600px;background:radial-gradient(circle,rgba(212,168,67,.06) 0%,transparent 70%);pointer-events:none}
 #hero h1 span{color:var(--gold)}
 .hero-stats{display:flex;gap:2rem;margin-top:2.5rem;flex-wrap:wrap}
 .hero-stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem 1.5rem;min-width:160px}
@@ -76,7 +76,7 @@ h3{font-size:1.15rem;font-weight:600;color:#fff;margin-bottom:.5rem}
 /* FINDER */
 #finder{padding-top:4rem}
 .finder-layout{display:grid;grid-template-columns:320px 1fr;gap:2rem;margin-top:2rem;align-items:start}
-@media(max-width:900px){.finder-layout{grid-template-columns:1fr}}
+@media(max-width:900px){.finder-layout{grid-template-columns:1fr}.filter-panel{position:static}}
 
 /* FILTER PANEL */
 .filter-panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;position:sticky;top:70px}
@@ -86,8 +86,8 @@ h3{font-size:1.15rem;font-weight:600;color:#fff;margin-bottom:.5rem}
 .filter-group .hint{font-size:.7rem;color:var(--text3);margin-top:.2rem;line-height:1.4}
 input[type=range]{-webkit-appearance:none;width:100%;height:6px;border-radius:3px;background:var(--bg3);outline:none;cursor:pointer}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--gold);cursor:pointer;border:2px solid var(--bg);box-shadow:0 0 8px rgba(212,168,67,.4)}
-.risk-btns{display:flex;gap:.4rem}
-.risk-btn{flex:1;padding:.5rem;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg3);color:var(--text2);cursor:pointer;font-size:.75rem;text-align:center;transition:all .2s}
+.risk-btns{display:flex;gap:.4rem;flex-wrap:wrap}
+.risk-btn{flex:1 1 auto;min-width:0;padding:.5rem .3rem;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg3);color:var(--text2);cursor:pointer;font-size:.72rem;text-align:center;transition:all .2s;white-space:nowrap}
 .risk-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(212,168,67,.1)}
 .reset-btn{width:100%;padding:.6rem;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);cursor:pointer;font-size:.85rem;transition:all .2s}
 .reset-btn:hover{color:var(--gold);border-color:var(--gold-dim)}
@@ -198,6 +198,19 @@ footer{text-align:center;padding:3rem 2rem;color:var(--text3);font-size:.8rem;bo
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 .fade-up{animation:fadeUp .6s ease both}
 .delay1{animation-delay:.1s}.delay2{animation-delay:.2s}.delay3{animation-delay:.3s}.delay4{animation-delay:.4s}
+@media(max-width:600px){
+  section{padding:3.5rem 1rem 2rem}
+  #ba-dive{padding:1.5rem;border-radius:var(--radius-sm)}
+  .rc-metrics{grid-template-columns:1fr 1fr}
+  .rc-tags{gap:.3rem}
+  .badge{font-size:.65rem;padding:.15rem .4rem}
+  nav{padding:0 1rem}
+  .strat-table{font-size:.75rem}
+  .strat-table th,.strat-table td{padding:.5rem .4rem}
+  .legal-row{flex-direction:column;gap:.2rem}
+  .world-grid{grid-template-columns:1fr 1fr}
+  .district-grid{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
