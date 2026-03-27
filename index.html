@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InvestGlobe — Умный подбор инвестиций в недвижимость</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07080d;--bg2:#0e1018;--bg3:#161822;--bg4:#1e2130;
+  --text:#d8dae5;--text2:#8b8fa5;--text3:#565a70;
+  --gold:#d4a843;--gold2:#f5d780;--gold-dim:#8a6d20;
+  --teal:#3ecfb2;--teal-dim:#1a6b5a;
+  --red:#e74c5e;--orange:#e8943a;--green:#43d480;--blue:#4c8bef;
+  --card:#12141e;--card-hover:#1a1d2a;--border:#252838;
+  --radius:12px;--radius-sm:8px;
+  --shadow:0 4px 24px rgba(0,0,0,.4);
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,sans-serif;
+  --mono:'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+a{color:var(--gold);text-decoration:none}
+a:hover{color:var(--gold2)}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(7,8,13,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;height:56px}
+nav .logo{font-weight:700;font-size:1.1rem;color:var(--gold);margin-right:2rem;white-space:nowrap}
+nav .logo span{color:var(--text)}
+nav .links{display:flex;gap:1.5rem;overflow-x:auto}
+nav .links a{color:var(--text2);font-size:.85rem;white-space:nowrap;transition:color .2s}
+nav .links a:hover,nav .links a.active{color:var(--gold)}
+@media(max-width:768px){nav .links{display:none}}
+
+/* SECTIONS */
+section{padding:5rem 2rem 3rem;max-width:1200px;margin:0 auto}
+h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:800;line-height:1.15;color:#fff}
+h2{font-size:clamp(1.5rem,3vw,2rem);font-weight:700;color:#fff;margin-bottom:1rem}
+h3{font-size:1.15rem;font-weight:600;color:#fff;margin-bottom:.5rem}
+.subtitle{color:var(--text2);font-size:1.1rem;max-width:700px;margin-top:.75rem;line-height:1.6}
+.badge{display:inline-block;padding:.2rem .6rem;border-radius:20px;font-size:.75rem;font-weight:600}
+.badge-gold{background:rgba(212,168,67,.15);color:var(--gold)}
+.badge-teal{background:rgba(62,207,178,.12);color:var(--teal)}
+.badge-red{background:rgba(231,76,94,.12);color:var(--red)}
+.badge-green{background:rgba(67,212,128,.12);color:var(--green)}
+.badge-blue{background:rgba(76,139,239,.12);color:var(--blue)}
+
+/* HERO */
+#hero{display:flex;flex-direction:column;justify-content:center;padding-top:80px;position:relative}
+#hero::after{content:'';position:absolute;top:0;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(212,168,67,.06) 0%,transparent 70%);pointer-events:none}
+#hero h1 span{color:var(--gold)}
+.hero-stats{display:flex;gap:2rem;margin-top:2.5rem;flex-wrap:wrap}
+.hero-stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem 1.5rem;min-width:160px}
+.hero-stat .num{font-size:1.8rem;font-weight:800;color:var(--gold)}
+.hero-stat .label{font-size:.8rem;color:var(--text2);margin-top:.2rem}
+.cta-row{margin-top:2.5rem;display:flex;gap:1rem;flex-wrap:wrap}
+.btn{padding:.8rem 1.8rem;border-radius:var(--radius-sm);font-weight:600;font-size:.95rem;cursor:pointer;border:none;transition:all .2s}
+.btn-gold{background:var(--gold);color:#0a0a0f}.btn-gold:hover{background:var(--gold2);transform:translateY(-1px)}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border)}.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+
+/* PIPELINE */
+#pipeline{background:var(--bg2);border-radius:var(--radius);padding:3rem;margin:0 auto;max-width:1200px}
+.pipeline-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem;margin-top:2rem}
+.pipe-card{background:var(--bg3);border-radius:var(--radius);padding:1.5rem;position:relative;border:1px solid var(--border);transition:border-color .3s}
+.pipe-card:hover{border-color:var(--gold-dim)}
+.pipe-num{position:absolute;top:-12px;left:16px;background:var(--gold);color:#0a0a0f;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem}
+.pipe-icon{font-size:1.8rem;margin-bottom:.8rem;display:block}
+.pipe-card p{color:var(--text2);font-size:.85rem;margin-top:.5rem}
+
+/* VALUE PROP */
+.value-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-top:2rem}
+.val-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;transition:all .3s}
+.val-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:var(--gold-dim)}
+.val-card .icon{font-size:2rem;margin-bottom:.8rem}
+
+/* FINDER */
+#finder{padding-top:4rem}
+.finder-layout{display:grid;grid-template-columns:320px 1fr;gap:2rem;margin-top:2rem;align-items:start}
+@media(max-width:900px){.finder-layout{grid-template-columns:1fr}}
+
+/* FILTER PANEL */
+.filter-panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;position:sticky;top:70px}
+.filter-group{margin-bottom:1.5rem}
+.filter-group label{display:flex;justify-content:space-between;align-items:center;font-size:.85rem;color:var(--text2);margin-bottom:.6rem}
+.filter-group label strong{color:var(--gold);font-size:1rem}
+.filter-group .hint{font-size:.7rem;color:var(--text3);margin-top:.2rem;line-height:1.4}
+input[type=range]{-webkit-appearance:none;width:100%;height:6px;border-radius:3px;background:var(--bg3);outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--gold);cursor:pointer;border:2px solid var(--bg);box-shadow:0 0 8px rgba(212,168,67,.4)}
+.risk-btns{display:flex;gap:.4rem}
+.risk-btn{flex:1;padding:.5rem;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg3);color:var(--text2);cursor:pointer;font-size:.75rem;text-align:center;transition:all .2s}
+.risk-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(212,168,67,.1)}
+.reset-btn{width:100%;padding:.6rem;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);cursor:pointer;font-size:.85rem;transition:all .2s}
+.reset-btn:hover{color:var(--gold);border-color:var(--gold-dim)}
+
+/* RESULTS */
+.results-area{}
+.results-count{color:var(--text2);font-size:.9rem;margin-bottom:1rem}
+.results-count span{color:var(--gold);font-weight:700}
+.result-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;cursor:pointer;transition:all .3s}
+.result-card:hover{border-color:var(--gold-dim);box-shadow:var(--shadow)}
+.result-card.expanded{border-color:var(--gold)}
+.rc-header{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem}
+.rc-left{flex:1}
+.rc-city{font-size:1.2rem;font-weight:700;color:#fff}
+.rc-country{color:var(--text2);font-size:.85rem}
+.rc-score{text-align:right;min-width:80px}
+.rc-score .num{font-size:2rem;font-weight:800;line-height:1}
+.rc-score .lbl{font-size:.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+.score-high .num{color:var(--green)}
+.score-mid .num{color:var(--gold)}
+.score-low .num{color:var(--text3)}
+.rc-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.8rem;margin-top:1rem}
+.rc-metric{background:var(--bg3);border-radius:var(--radius-sm);padding:.6rem .8rem}
+.rc-metric .val{font-size:1.1rem;font-weight:700;color:#fff}
+.rc-metric .lbl{font-size:.7rem;color:var(--text2)}
+.rc-tags{display:flex;gap:.4rem;margin-top:1rem;flex-wrap:wrap}
+.rc-detail{display:none;margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border)}
+.result-card.expanded .rc-detail{display:block}
+.rc-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+@media(max-width:600px){.rc-detail-grid{grid-template-columns:1fr}}
+.rc-detail h4{color:var(--gold);font-size:.85rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem}
+.rc-detail ul{list-style:none;padding:0}
+.rc-detail li{padding:.3rem 0;color:var(--text2);font-size:.9rem;border-bottom:1px solid var(--border)}
+.rc-detail li::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:.5rem;vertical-align:middle}
+.pro::before{background:var(--green)!important}
+.con::before{background:var(--red)!important}
+.rc-projection{background:var(--bg3);border-radius:var(--radius-sm);padding:1rem;margin-top:1rem}
+.rc-projection h4{margin-bottom:.8rem}
+.proj-row{display:flex;justify-content:space-between;padding:.3rem 0;font-size:.9rem}
+.proj-row .k{color:var(--text2)}
+.proj-row .v{color:#fff;font-weight:600}
+
+/* BA DEEP DIVE */
+#ba-dive{background:var(--bg2);border-radius:var(--radius);padding:3rem;margin:0 auto;max-width:1200px}
+.district-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin-top:2rem}
+.dist-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem;transition:all .3s}
+.dist-card:hover{border-color:var(--gold-dim);transform:translateY(-2px)}
+.dist-name{font-weight:700;font-size:1.05rem;color:#fff}
+.dist-type{font-size:.75rem;color:var(--text3);margin-bottom:.8rem}
+.dist-stats{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.dist-stat{background:var(--bg);border-radius:6px;padding:.5rem}
+.dist-stat .v{font-weight:700;color:var(--gold);font-size:.95rem}
+.dist-stat .l{font-size:.65rem;color:var(--text3);margin-top:.1rem}
+.dist-bar{height:4px;background:var(--bg);border-radius:2px;margin-top:.8rem;overflow:hidden}
+.dist-bar-fill{height:100%;border-radius:2px;transition:width .8s}
+.strat-table{width:100%;border-collapse:collapse;margin-top:1.5rem;font-size:.85rem}
+.strat-table th{text-align:left;padding:.8rem;color:var(--text3);border-bottom:1px solid var(--border);font-size:.75rem;text-transform:uppercase;letter-spacing:.5px}
+.strat-table td{padding:.8rem;border-bottom:1px solid var(--border);color:var(--text)}
+.strat-table tr:hover td{background:rgba(212,168,67,.03)}
+.strat-table .highlight{color:var(--gold);font-weight:600}
+
+/* WORLD COMPARISON */
+.world-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-top:1.5rem}
+.world-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;text-align:center;transition:all .3s;position:relative;overflow:hidden}
+.world-card:hover{border-color:var(--gold-dim)}
+.world-card .flag{font-size:2rem}
+.world-card .city{font-weight:700;color:#fff;margin:.3rem 0}
+.world-card .stat{font-size:.8rem;color:var(--text2)}
+.world-card .stat strong{color:var(--gold)}
+.heat-bar{width:100%;height:4px;background:var(--bg);border-radius:2px;margin-top:.6rem}
+.heat-fill{height:100%;border-radius:2px}
+
+/* LEGAL */
+.legal-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1.5rem}
+@media(max-width:700px){.legal-grid{grid-template-columns:1fr}}
+.legal-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem}
+.legal-card h3{color:var(--gold);font-size:.95rem}
+.legal-row{display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.85rem}
+.legal-row:last-child{border:none}
+
+/* CONTENT PLAN */
+.plan-timeline{margin-top:2rem;position:relative;padding-left:2rem}
+.plan-timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--border)}
+.plan-item{position:relative;margin-bottom:1.5rem;padding-left:1.5rem}
+.plan-item::before{content:'';position:absolute;left:-2rem;top:.4rem;width:12px;height:12px;border-radius:50%;background:var(--gold);border:3px solid var(--bg)}
+.plan-week{font-size:.75rem;color:var(--gold);text-transform:uppercase;letter-spacing:.5px}
+.plan-title{font-weight:600;color:#fff;margin:.2rem 0}
+.plan-desc{font-size:.85rem;color:var(--text2)}
+
+/* METHODOLOGY */
+#method{background:var(--bg2);border-radius:var(--radius);padding:3rem;margin:0 auto;max-width:1200px}
+.prompt-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-top:1rem;font-family:var(--mono);font-size:.82rem;line-height:1.7;color:var(--text2);white-space:pre-wrap;position:relative;max-height:400px;overflow-y:auto}
+.prompt-box::before{content:'SUPERPROMPT';position:absolute;top:8px;right:12px;font-size:.6rem;color:var(--gold-dim);letter-spacing:1px;font-family:var(--font)}
+.check-list{list-style:none;margin-top:1rem}
+.check-list li{padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.9rem;color:var(--text2)}
+.check-list li::before{content:'\2713';color:var(--green);margin-right:.5rem;font-weight:700}
+
+/* FOOTER */
+footer{text-align:center;padding:3rem 2rem;color:var(--text3);font-size:.8rem;border-top:1px solid var(--border);margin-top:3rem}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--text3)}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .6s ease both}
+.delay1{animation-delay:.1s}.delay2{animation-delay:.2s}.delay3{animation-delay:.3s}.delay4{animation-delay:.4s}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Invest<span>Globe</span></div>
+  <div class="links">
+    <a href="#hero">Главная</a>
+    <a href="#finder">Подбор инвестиций</a>
+    <a href="#ba-dive">Буэнос-Айрес</a>
+  </div>
+</nav>
+
+<!-- =================== HERO =================== -->
+<section id="hero" style="min-height:auto;padding-bottom:1rem">
+  <h1 class="fade-up">Куда вложить деньги<br>в <span>недвижимость</span>?</h1>
+  <p class="subtitle fade-up delay1">Устали разбираться в сотнях вариантов? Задайте свои параметры &mdash; сумму, сроки, допустимый риск &mdash; и получите персональный рейтинг рынков недвижимости по всему миру.</p>
+</section>
+
+<!-- =================== SMART FINDER =================== -->
+<section id="finder" style="padding-top:0">
+  <h2>Подбор инвестиции</h2>
+  <p class="subtitle">Настройте параметры слева &mdash; справа появятся рынки, отсортированные по совпадению с вашими критериями.</p>
+
+  <div class="finder-layout">
+    <!-- FILTERS -->
+    <div class="filter-panel">
+      <div class="filter-group">
+        <label>Бюджет <strong id="budgetVal">$200K</strong></label>
+        <input type="range" id="budget" min="50" max="1000" value="200" step="10">
+        <div class="hint">Сумма, которую вы готовы вложить целиком (включая расходы на сделку)</div>
+      </div>
+
+      <div class="filter-group">
+        <label>Горизонт <strong id="horizonVal">5 лет</strong></label>
+        <input type="range" id="horizon" min="2" max="15" value="5">
+        <div class="hint">Через сколько лет вы хотите зафиксировать прибыль и выйти из инвестиции</div>
+      </div>
+
+      <div class="filter-group">
+        <label>Целевая доходность <strong id="targetVal">8% год</strong></label>
+        <input type="range" id="target" min="3" max="20" value="8">
+        <div class="hint">CAGR &mdash; средний ежегодный рост вашего капитала (аренда + рост цены). 5-7% = надежно, 10-15% = агрессивно</div>
+      </div>
+
+      <div class="filter-group">
+        <label>Допустимый риск</label>
+        <div class="risk-btns" id="riskBtns">
+          <div class="risk-btn" data-v="1" style="color:var(--green)">Мин</div>
+          <div class="risk-btn active" data-v="2">Низкий</div>
+          <div class="risk-btn" data-v="3">Средний</div>
+          <div class="risk-btn" data-v="4">Высокий</div>
+          <div class="risk-btn" data-v="5" style="color:var(--red)">Макс</div>
+        </div>
+        <div class="hint">1 = &laquo;ни копейки не потеряю&raquo;, 5 = &laquo;готов рискнуть 30% ради шанса утроить&raquo;</div>
+      </div>
+
+      <div class="filter-group">
+        <label>Вовлеченность <strong id="effortVal">Минимум</strong></label>
+        <input type="range" id="effort" min="1" max="5" value="2">
+        <div class="hint">Сколько личного времени готовы тратить: 1 = автопилот, 5 = активное управление</div>
+      </div>
+
+      <div class="filter-group">
+        <label>Важно &laquo;полное владение&raquo;</label>
+        <div class="risk-btns" id="ownerBtns">
+          <div class="risk-btn active" data-v="any">Не важно</div>
+          <div class="risk-btn" data-v="full">Только полное</div>
+        </div>
+        <div class="hint">Полное владение (dominio/freehold) vs аренда земли на 25 лет (leasehold) &mdash; огромная разница</div>
+      </div>
+
+      <button class="reset-btn" onclick="resetFilters()">Сбросить фильтры</button>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="results-area" id="results"></div>
+  </div>
+</section>
+
+<!-- =================== BA DEEP DIVE =================== -->
+<div id="ba-dive">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem">
+    <div>
+      <div class="badge badge-gold">Глубокий анализ</div>
+      <h2 style="margin-top:.5rem">&#x1F1E6;&#x1F1F7; Буэнос-Айрес: Районы</h2>
+      <p style="color:var(--text2);max-width:600px">Рынок, который упал на 30-40% за десятилетие и начал восстанавливаться. Вы покупаете ниже исторического тренда &mdash; ни Майами, ни Барселона этого не предлагают.</p>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:.8rem;color:var(--text3)">Средняя цена</div>
+      <div style="font-size:1.6rem;font-weight:800;color:var(--gold)">$2 450/м&sup2;</div>
+      <div style="font-size:.75rem;color:var(--text3)">при пике $2 800</div>
+    </div>
+  </div>
+
+  <div class="district-grid" id="districtGrid"></div>
+
+  <h3 style="margin-top:2.5rem;color:var(--gold)">4 стратегии для бюджета $400K (нерезидент, 10 лет)</h3>
+  <div style="overflow-x:auto">
+    <table class="strat-table">
+      <thead>
+        <tr>
+          <th>Стратегия</th>
+          <th>Район(ы)</th>
+          <th>Объекты</th>
+          <th>Чист. аренда (год 1)</th>
+          <th>Консерв. CAGR</th>
+          <th>Оптимист. CAGR</th>
+          <th>Итого (оптим.)</th>
+          <th>Риск</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong style="color:#fff">Баланс</strong></td>
+          <td>Villa Crespo</td>
+          <td>2 &times; 2-комн. 65м&sup2;</td>
+          <td class="highlight">$13 350 (3.3%)</td>
+          <td>5.5%</td>
+          <td class="highlight">7.6%</td>
+          <td>$829K (+107%)</td>
+          <td><span class="badge badge-gold">Средний</span></td>
+        </tr>
+        <tr>
+          <td><strong style="color:#fff">Рост</strong></td>
+          <td>Chacarita / V.Ort&uacute;zar</td>
+          <td>PH + квартира</td>
+          <td>$10 860 (2.7%)</td>
+          <td>6.3%</td>
+          <td class="highlight">8.8%</td>
+          <td>$930K (+132%)</td>
+          <td><span class="badge badge-gold">Сред-выс</span></td>
+        </tr>
+        <tr>
+          <td><strong style="color:#fff">Сохранение</strong></td>
+          <td>Belgrano / Recoleta</td>
+          <td>1 &times; 3-комн. 85м&sup2;</td>
+          <td>$8 380 (2.1%)</td>
+          <td>4.1%</td>
+          <td>5.8%</td>
+          <td>$703K (+76%)</td>
+          <td><span class="badge badge-green">Низкий</span></td>
+        </tr>
+        <tr>
+          <td><strong style="color:#fff">Спекулят.</strong></td>
+          <td>P.Patricios / Barracas</td>
+          <td>3-4 объекта</td>
+          <td>$10 860 (2.7%)</td>
+          <td>5.5%</td>
+          <td class="highlight">9.7%</td>
+          <td>$1 006K (+152%)</td>
+          <td><span class="badge badge-red">Высокий</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="margin-top:2.5rem;color:var(--gold)">BA vs Мир: Сравнение для нерезидента ($400K, 10 лет)</h3>
+  <div class="world-grid" id="worldGrid"></div>
+
+  <h3 style="margin-top:2.5rem;color:var(--gold)">Налоговый статус: Резидент vs Нерезидент</h3>
+  <div class="legal-grid">
+    <div class="legal-card">
+      <h3>&#x1F464; Нерезидент (турист)</h3>
+      <div class="legal-row"><span>Налог на аренду</span><strong style="color:var(--red)">21%</strong></div>
+      <div class="legal-row"><span>Налог на прирост (при продаже)</span><strong>15%</strong></div>
+      <div class="legal-row"><span>Bienes Personales</span><strong>0.5%/год</strong></div>
+      <div class="legal-row"><span>Покупка недвижимости</span><strong style="color:var(--green)">Без ограничений</strong></div>
+      <div class="legal-row"><span>Нужна DNI (местный ID)</span><strong>Нет, CDI достаточно</strong></div>
+      <div class="legal-row"><span>Аренда через крипту</span><strong style="color:var(--gold)">Серая зона</strong></div>
+    </div>
+    <div class="legal-card">
+      <h3>&#x1F3E0; Резидент</h3>
+      <div class="legal-row"><span>Налог на аренду</span><strong style="color:var(--green)">5-35% (прогрессив.)</strong></div>
+      <div class="legal-row"><span>Налог на прирост (при продаже)</span><strong>15%</strong></div>
+      <div class="legal-row"><span>Bienes Personales</span><strong>0.5-1.75%/год</strong></div>
+      <div class="legal-row"><span>Покупка недвижимости</span><strong style="color:var(--green)">Без ограничений</strong></div>
+      <div class="legal-row"><span>UVA-ипотека</span><strong style="color:var(--green)">Доступна</strong></div>
+      <div class="legal-row"><span>Управление арендой</span><strong>Ниже комиссия</strong></div>
+    </div>
+  </div>
+  <p style="margin-top:1rem;font-size:.8rem;color:var(--text3)">* Формула чистой ренты нерезидента: валовая доходность &times; 0.67 &minus; 0.75% от стоимости объекта. Все данные требуют верификации с местным налоговым консультантом.</p>
+</div>
+
+
+<footer>
+  InvestGlobe &mdash; MVP / Март 2026 &mdash; Все данные требуют верификации экспертами перед принятием инвестиционных решений
+</footer>
+
+<script>
+// ======================== DATA ========================
+const markets = [
+  {
+    id:'buenos-aires', city:'Буэнос-Айрес', country:'Аргентина', flag:'\u{1F1E6}\u{1F1F7}',
+    minBudget:80, maxBudget:600, avgPrice:2450,
+    grossYield:5.5, netYield:3.0,
+    growth:{cons:4.5, opt:9}, totalReturn:{cons:5.5, opt:8.5},
+    risk:3, effort:3, liquidity:3,
+    ownership:'full', taxBurden:'medium',
+    highlights:['Дисконт 15-25% к историческому пику','Начало восстановительного цикла','Полное право собственности (dominio)','UVA-ипотека создает новый спрос'],
+    risks:['Страновой риск Аргентины (6 дефолтов за 40 лет)','Инфляция песо (сделки в USD, но влияет на аренду)','Политическая неопределенность (Милей)'],
+    legalNote:'Нерезидент может покупать без ограничений. Нужен CDI (налоговый ID). Сделка через escritura у нотариуса.',
+    districts:true
+  },
+  {
+    id:'miami', city:'Майами', country:'США', flag:'\u{1F1FA}\u{1F1F8}',
+    minBudget:300, maxBudget:2000, avgPrice:5800,
+    grossYield:4.5, netYield:2.5,
+    growth:{cons:2, opt:4}, totalReturn:{cons:4, opt:6},
+    risk:1.5, effort:2, liquidity:5,
+    ownership:'full', taxBurden:'high',
+    highlights:['Максимальная ликвидность','Прозрачная юридическая система','Стабильный арендный спрос'],
+    risks:['Цены на 40-60% выше допандемийных','Property tax 1-2.5% ежегодно (в разы выше BA)','FIRPTA: 30% withholding для нерезидента','Высокий порог входа'],
+    legalNote:'Нерезидент может покупать свободно. FIRPTA withholding 15% при продаже. Property tax $6-10K/год на объект $400K.'
+  },
+  {
+    id:'barcelona', city:'Барселона', country:'Испания', flag:'\u{1F1EA}\u{1F1F8}',
+    minBudget:250, maxBudget:1500, avgPrice:4200,
+    grossYield:4.0, netYield:2.5,
+    growth:{cons:2, opt:4}, totalReturn:{cons:4, opt:6},
+    risk:1.5, effort:2, liquidity:4.5,
+    ownership:'full', taxBurden:'high',
+    highlights:['Зрелый стабильный рынок','Высокая ликвидность','Туристический арендный спрос'],
+    risks:['Цены удвоились за 7 лет — потенциал роста ограничен','Налог для не-EU нерезидента 24%','Регулирование аренды ужесточается'],
+    legalNote:'Нерезидент покупает свободно. NIE (ID для иностранца) обязателен. Нотариальная сделка.'
+  },
+  {
+    id:'lisbon', city:'Лиссабон', country:'Португалия', flag:'\u{1F1F5}\u{1F1F9}',
+    minBudget:200, maxBudget:1000, avgPrice:4000,
+    grossYield:4.5, netYield:3.0,
+    growth:{cons:2, opt:5}, totalReturn:{cons:4.5, opt:7},
+    risk:2, effort:2, liquidity:4,
+    ownership:'full', taxBurden:'medium',
+    highlights:['Golden Visa (при инвестиции от 500K)','Растущий рынок','NHR налоговый режим'],
+    risks:['Golden Visa ограничена (только фонды/реновация)','Цены выросли значительно','Налог 25% для нерезидента'],
+    legalNote:'Нерезидент покупает свободно. NIF (налоговый номер) обязателен.'
+  },
+  {
+    id:'dubai', city:'Дубай', country:'ОАЭ', flag:'\u{1F1E6}\u{1F1EA}',
+    minBudget:200, maxBudget:2000, avgPrice:3800,
+    grossYield:6.5, netYield:5.5,
+    growth:{cons:3, opt:6}, totalReturn:{cons:7, opt:10},
+    risk:2.5, effort:2, liquidity:4,
+    ownership:'full', taxBurden:'low',
+    highlights:['Нет налога на доход и аренду','Высокая доходность от аренды','Freehold зоны для иностранцев','Виза инвестора от $205K'],
+    risks:['Рынок цикличный (просадка 2009, 2015)','Перенасыщение новостройками','Высокие service charges','Зависимость от нефти и туризма'],
+    legalNote:'Покупка в freehold зонах без ограничений. Нет income tax, нет capital gains tax. DLD fee 4% при покупке.'
+  },
+  {
+    id:'istanbul', city:'Стамбул', country:'Турция', flag:'\u{1F1F9}\u{1F1F7}',
+    minBudget:100, maxBudget:800, avgPrice:2200,
+    grossYield:5.5, netYield:4.0,
+    growth:{cons:5, opt:10}, totalReturn:{cons:7, opt:12},
+    risk:3.5, effort:3, liquidity:3.5,
+    ownership:'full', taxBurden:'medium',
+    highlights:['Гражданство при покупке от $400K','Низкий порог входа','Быстрый рост цен в USD','Мост Европа-Азия — уникальная локация'],
+    risks:['Лира нестабильна (сделки в USD/EUR)','Политический риск','Землетрясения в регионе','Качество строительства варьируется'],
+    legalNote:'Нерезидент покупает свободно (кроме военных зон). ТАПУ (титул) оформляется за 1-2 дня.'
+  },
+  {
+    id:'tbilisi', city:'Тбилиси', country:'Грузия', flag:'\u{1F1EC}\u{1F1EA}',
+    minBudget:30, maxBudget:300, avgPrice:1200,
+    grossYield:9.0, netYield:7.5,
+    growth:{cons:5, opt:10}, totalReturn:{cons:10, opt:15},
+    risk:3, effort:3, liquidity:2.5,
+    ownership:'full', taxBurden:'low',
+    highlights:['Самый низкий порог входа','Рекордная доходность от аренды','Нет налога для нерезидента при продаже >2 лет','Безвиз для россиян'],
+    risks:['Маленький рынок — низкая ликвидность','Лари волатилен','Сезонность аренды (туристы)','Инфраструктура развивается'],
+    legalNote:'Нерезидент покупает свободно за 1 день. Налог 5% на аренду (можно 1% при статусе малого бизнеса). 0% на прирост при владении >2 лет.'
+  },
+  {
+    id:'bangkok', city:'Бангкок', country:'Таиланд', flag:'\u{1F1F9}\u{1F1ED}',
+    minBudget:100, maxBudget:500, avgPrice:3200,
+    grossYield:5.0, netYield:3.5,
+    growth:{cons:1, opt:3}, totalReturn:{cons:4, opt:6},
+    risk:2.5, effort:3, liquidity:2,
+    ownership:'condo', taxBurden:'medium',
+    highlights:['Качество жизни','Развитая инфраструктура','Стабильный бат'],
+    risks:['Иностранец НЕ может владеть землей','Только кондо (до 49% квоты)','Слабый рост капитала','Низкая ликвидность при продаже'],
+    legalNote:'Только condо freehold (квота 49% иностранцев). Земля — только leasehold 30 лет. Withholding tax прогрессивный до 35%.'
+  },
+  {
+    id:'bali', city:'Бали', country:'Индонезия', flag:'\u{1F1EE}\u{1F1E9}',
+    minBudget:100, maxBudget:500, avgPrice:2500,
+    grossYield:8.0, netYield:5.0,
+    growth:{cons:0, opt:0}, totalReturn:{cons:4, opt:5},
+    risk:4, effort:4, liquidity:1.5,
+    ownership:'leasehold', taxBurden:'complex',
+    highlights:['Высокая валовая доходность (8-12%)','Lifestyle-инвестиция','Растущий туризм'],
+    risks:['НЕТ собственности — leasehold 25 лет','Через 25 лет актив = 0','Management costs 20-30%','Сезонность','Сложная юрисдикция (PT PMA)'],
+    legalNote:'Иностранец НЕ может владеть. Leasehold 25-30 лет или через PT PMA (компания). Актив обнуляется по истечении аренды.'
+  },
+  {
+    id:'montenegro', city:'Будва / Тиват', country:'Черногория', flag:'\u{1F1F2}\u{1F1EA}',
+    minBudget:80, maxBudget:500, avgPrice:2800,
+    grossYield:5.5, netYield:4.0,
+    growth:{cons:3, opt:7}, totalReturn:{cons:6, opt:9},
+    risk:2.5, effort:2.5, liquidity:3,
+    ownership:'full', taxBurden:'low',
+    highlights:['Путь в ЕС (кандидат)','Евро — нет валютного риска','Низкие налоги (9% flat)','Побережье Адриатики'],
+    risks:['Сезонность аренды (лето)','Маленький рынок','Инфраструктура ограничена','Ликвидность средняя'],
+    legalNote:'Нерезидент покупает свободно. Налог 9% flat на доход. Нет налога на имущество для физлиц (кроме luxury).'
+  }
+];
+
+const baDistricts = [
+  {name:'Palermo',type:'Зрелый / Премиум',price:3400,peak:4000,grossY:5.0,growth:4,risk:1.5,vacancy:2,color:'var(--green)',desc:'Главный район экспатов. Рестораны, парки, коворкинги. Максимальная ликвидность.'},
+  {name:'Recoleta',type:'Зрелый / Элитный',price:3100,peak:3600,grossY:4.5,growth:4,risk:1.5,vacancy:2,color:'var(--green)',desc:'«Парижский» район BA. Дипломаты, длинные контракты. Минимальная волатильность.'},
+  {name:'Belgrano',type:'Зрелый / Семейный',price:3000,peak:3400,grossY:4.5,growth:4,risk:1.5,vacancy:2,color:'var(--green)',desc:'Семейная элита. Школы, парки. Самый стабильный при кризисах.'},
+  {name:'Villa Crespo',type:'Растущий / Баланс',price:2600,peak:3000,grossY:6.5,growth:5.3,risk:2.5,vacancy:2.5,color:'var(--gold)',desc:'«Следующий Палермо». Гентрификация на полном ходу. Лучший баланс доходности и роста.'},
+  {name:'Chacarita',type:'Растущий / Потенциал',price:2350,peak:2800,grossY:5.5,growth:8,risk:3,vacancy:3,color:'var(--gold)',desc:'«Следующая Villa Crespo». Художники, диджитал-номады, крафтовые бары. PH-формат особенно ценен.'},
+  {name:'Villa Ortúzar',type:'Растущий / Тихий',price:2300,peak:2700,grossY:5.5,growth:7,risk:3,vacancy:3.5,color:'var(--gold)',desc:'Тихий район рядом с Chacarita. Потенциал гентрификации, низкая конкуренция.'},
+  {name:'Caballito',type:'Средний / Стабильный',price:2200,peak:2600,grossY:5.0,growth:3,risk:2,vacancy:3,color:'var(--teal)',desc:'Геоцентр BA. Средний класс. Стабильный, но без взрывного роста.'},
+  {name:'Parque Patricios',type:'Спекулятивный',price:1750,peak:2200,grossY:5.5,growth:7,risk:4,vacancy:4,color:'var(--red)',desc:'Distrito Tecnológico. Ставка на инфраструктуру. Максимальный потенциал при реализации проектов.'},
+  {name:'Barracas',type:'Спекулятивный',price:1700,peak:2100,grossY:5.5,growth:8,risk:4.5,vacancy:5,color:'var(--red)',desc:'«Самый недооцененный район BA» по мнению аналитиков. Линия F метро может все изменить.'},
+  {name:'San Isidro (пригород)',type:'Пригород / Близкий',price:2000,peak:2500,grossY:4.5,growth:4,risk:2,vacancy:3,color:'var(--teal)',desc:'Ближний пригород. Дешевле города, но с хорошей инфраструктурой. Семейный формат.'},
+  {name:'Tigre (пригород)',type:'Пригород / Далекий',price:1200,peak:1600,grossY:5.0,growth:5,risk:3.5,vacancy:5,color:'var(--orange)',desc:'Далекий пригород. Очень дешево. Дома у воды. Риск ликвидности, но потенциал для бюджетных инвестиций.'}
+];
+
+const worldComparison = [
+  {city:'Буэнос-Айрес',flag:'\u{1F1E6}\u{1F1F7}',rent:'2.5-3.5%',growth:'4-9%',tax:'Средние (21%)',liquid:'Средняя',own:'Полная',score:82,color:'var(--gold)'},
+  {city:'Майами',flag:'\u{1F1FA}\u{1F1F8}',rent:'2-3%',growth:'2-4%',tax:'Высокие (30%+)',liquid:'Высокая',own:'Полная',score:65,color:'var(--teal)'},
+  {city:'Барселона',flag:'\u{1F1EA}\u{1F1F8}',rent:'2-3.5%',growth:'2-4%',tax:'Высокие (24%)',liquid:'Высокая',own:'Полная',score:62,color:'var(--teal)'},
+  {city:'Бангкок',flag:'\u{1F1F9}\u{1F1ED}',rent:'3-4.5%',growth:'1-3%',tax:'Средние',liquid:'Низкая',own:'Кондо',score:50,color:'var(--orange)'},
+  {city:'Бали',flag:'\u{1F1EE}\u{1F1E9}',rent:'4-6%',growth:'0%',tax:'Сложные',liquid:'Низкая',own:'Аренда 25 лет',score:38,color:'var(--red)'}
+];
+
+// ======================== SCORING ========================
+function calcScore(m, budget, horizon, target, risk, effort, ownerReq) {
+  let score = 0;
+  // Budget fit (0-20)
+  if (budget >= m.minBudget && budget <= m.maxBudget) score += 20;
+  else if (budget >= m.minBudget * 0.7 && budget <= m.maxBudget * 1.3) score += 10;
+  else score += 2;
+
+  // Return match (0-25)
+  const avgReturn = (m.totalReturn.cons + m.totalReturn.opt) / 2;
+  const returnDiff = Math.abs(avgReturn - target);
+  if (returnDiff < 1) score += 25;
+  else if (returnDiff < 3) score += 18;
+  else if (returnDiff < 5) score += 10;
+  else score += 3;
+
+  // Risk match (0-20)
+  const riskDiff = Math.abs(m.risk - risk);
+  if (riskDiff < 0.5) score += 20;
+  else if (riskDiff < 1.5) score += 15;
+  else if (riskDiff < 2.5) score += 8;
+  else score += 2;
+
+  // Effort match (0-15)
+  const effortDiff = Math.abs(m.effort - effort);
+  if (effortDiff < 1) score += 15;
+  else if (effortDiff < 2) score += 10;
+  else score += 4;
+
+  // Ownership (0-10)
+  if (ownerReq === 'full') {
+    if (m.ownership === 'full') score += 10;
+    else if (m.ownership === 'condo') score += 4;
+    else score += 0;
+  } else {
+    score += 8;
+  }
+
+  // Liquidity bonus (0-10)
+  score += m.liquidity * 2;
+
+  return Math.min(100, Math.round(score));
+}
+
+function projectionCalc(budget, m, horizon) {
+  const investable = budget * 0.92;
+  const consGrowth = Math.pow(1 + m.growth.cons / 100, horizon);
+  const optGrowth = Math.pow(1 + m.growth.opt / 100, horizon);
+  const consVal = investable * consGrowth;
+  const optVal = investable * optGrowth;
+  const consRent = investable * m.netYield / 100 * horizon * (1 + m.growth.cons / 200);
+  const optRent = investable * m.netYield / 100 * horizon * (1 + m.growth.opt / 200);
+  const consSale = consVal * 0.96 * 0.85;
+  const optSale = optVal * 0.96 * 0.85;
+  return {
+    consTotal: Math.round((consSale + consRent) / 1000),
+    optTotal: Math.round((optSale + optRent) / 1000),
+    consProfit: Math.round((consSale + consRent - budget * 1000) / 1000),
+    optProfit: Math.round((optSale + optRent - budget * 1000) / 1000),
+    consCAGR: ((Math.pow((consSale + consRent) / (budget * 1000), 1 / horizon) - 1) * 100).toFixed(1),
+    optCAGR: ((Math.pow((optSale + optRent) / (budget * 1000), 1 / horizon) - 1) * 100).toFixed(1),
+    yearlyRent: Math.round(investable * m.netYield / 100 / 1000)
+  };
+}
+
+// ======================== RENDER ========================
+let currentRisk = 2;
+let currentOwner = 'any';
+
+function getFilters() {
+  return {
+    budget: +document.getElementById('budget').value,
+    horizon: +document.getElementById('horizon').value,
+    target: +document.getElementById('target').value,
+    risk: currentRisk,
+    effort: +document.getElementById('effort').value,
+    owner: currentOwner
+  };
+}
+
+function renderResults() {
+  const f = getFilters();
+  const scored = markets.map(m => ({...m, score: calcScore(m, f.budget, f.horizon, f.target, f.risk, f.effort, f.owner)}));
+  scored.sort((a, b) => b.score - a.score);
+
+  const area = document.getElementById('results');
+  let html = `<div class="results-count">Найдено <span>${scored.length}</span> рынков, отсортировано по совпадению</div>`;
+
+  scored.forEach(m => {
+    const proj = projectionCalc(f.budget, m, f.horizon);
+    const scoreClass = m.score >= 70 ? 'score-high' : m.score >= 50 ? 'score-mid' : 'score-low';
+    const riskLabel = m.risk <= 2 ? 'Низкий' : m.risk <= 3 ? 'Средний' : m.risk <= 4 ? 'Высокий' : 'Очень высокий';
+    const riskBadge = m.risk <= 2 ? 'badge-green' : m.risk <= 3 ? 'badge-gold' : 'badge-red';
+    const effortLabel = ['','Автопилот','Минимум','Умеренно','Активно','Полное'][m.effort];
+    const ownLabel = m.ownership === 'full' ? 'Полная' : m.ownership === 'condo' ? 'Кондо' : 'Аренда';
+    const ownBadge = m.ownership === 'full' ? 'badge-green' : m.ownership === 'condo' ? 'badge-gold' : 'badge-red';
+
+    html += `
+    <div class="result-card" onclick="this.classList.toggle('expanded')">
+      <div class="rc-header">
+        <div class="rc-left">
+          <div class="rc-city">${m.flag} ${m.city}</div>
+          <div class="rc-country">${m.country} &middot; от $${m.minBudget}K &middot; $${m.avgPrice}/м&sup2;</div>
+        </div>
+        <div class="rc-score ${scoreClass}">
+          <div class="num">${m.score}</div>
+          <div class="lbl">совпадение</div>
+        </div>
+      </div>
+      <div class="rc-metrics">
+        <div class="rc-metric"><div class="val">${m.netYield}%</div><div class="lbl">Чист. аренда</div></div>
+        <div class="rc-metric"><div class="val">${m.growth.cons}-${m.growth.opt}%</div><div class="lbl">Рост/год</div></div>
+        <div class="rc-metric"><div class="val">${m.totalReturn.cons}-${m.totalReturn.opt}%</div><div class="lbl">CAGR</div></div>
+        <div class="rc-metric"><div class="val">${riskLabel}</div><div class="lbl">Риск</div></div>
+      </div>
+      <div class="rc-tags">
+        <span class="badge ${riskBadge}">Риск: ${riskLabel}</span>
+        <span class="badge badge-blue">Вовлеч.: ${effortLabel}</span>
+        <span class="badge ${ownBadge}">Собств.: ${ownLabel}</span>
+        <span class="badge badge-gold">${m.taxBurden === 'low' ? 'Низкие налоги' : m.taxBurden === 'medium' ? 'Средние налоги' : m.taxBurden === 'high' ? 'Высокие налоги' : 'Сложные налоги'}</span>
+      </div>
+      <div class="rc-detail">
+        <div class="rc-detail-grid">
+          <div>
+            <h4>Преимущества</h4>
+            <ul>${m.highlights.map(h => `<li class="pro">${h}</li>`).join('')}</ul>
+          </div>
+          <div>
+            <h4>Риски</h4>
+            <ul>${m.risks.map(r => `<li class="con">${r}</li>`).join('')}</ul>
+          </div>
+        </div>
+        <div class="rc-projection">
+          <h4>Прогноз: $${f.budget}K на ${f.horizon} лет</h4>
+          <div class="proj-row"><span class="k">Чистая аренда (год 1)</span><span class="v">~$${proj.yearlyRent}K</span></div>
+          <div class="proj-row"><span class="k">Консервативный итог</span><span class="v">$${proj.consTotal}K (${proj.consProfit > 0 ? '+' : ''}$${proj.consProfit}K)</span></div>
+          <div class="proj-row"><span class="k">Оптимистичный итог</span><span class="v" style="color:var(--gold)">$${proj.optTotal}K (${proj.optProfit > 0 ? '+' : ''}$${proj.optProfit}K)</span></div>
+          <div class="proj-row"><span class="k">CAGR (консерв. / оптимист.)</span><span class="v">${proj.consCAGR}% / ${proj.optCAGR}%</span></div>
+        </div>
+        <p style="margin-top:.8rem;font-size:.8rem;color:var(--text3)">${m.legalNote}</p>
+        ${m.districts ? '<p style="margin-top:.5rem"><a href="#ba-dive" style="font-size:.85rem">Смотреть детальный разбор районов BA &rarr;</a></p>' : ''}
+      </div>
+    </div>`;
+  });
+
+  area.innerHTML = html;
+}
+
+function renderDistricts() {
+  const grid = document.getElementById('districtGrid');
+  grid.innerHTML = baDistricts.map(d => {
+    const discountPct = Math.round((1 - d.price / d.peak) * 100);
+    const riskW = (d.risk / 5 * 100);
+    return `
+    <div class="dist-card">
+      <div class="dist-name">${d.name}</div>
+      <div class="dist-type">${d.type}</div>
+      <div class="dist-stats">
+        <div class="dist-stat"><div class="v">$${d.price.toLocaleString()}</div><div class="l">за м&sup2;</div></div>
+        <div class="dist-stat"><div class="v">${d.grossY}%</div><div class="l">валов. аренда</div></div>
+        <div class="dist-stat"><div class="v">+${d.growth}%</div><div class="l">рост/год</div></div>
+        <div class="dist-stat"><div class="v">-${discountPct}%</div><div class="l">от пика</div></div>
+      </div>
+      <div class="dist-bar"><div class="dist-bar-fill" style="width:${riskW}%;background:${d.color}"></div></div>
+      <p style="font-size:.8rem;color:var(--text2);margin-top:.5rem">${d.desc}</p>
+    </div>`;
+  }).join('');
+}
+
+function renderWorldComparison() {
+  const grid = document.getElementById('worldGrid');
+  grid.innerHTML = worldComparison.map(w => `
+    <div class="world-card">
+      <div class="flag">${w.flag}</div>
+      <div class="city">${w.city}</div>
+      <div class="stat">Рента: <strong>${w.rent}</strong></div>
+      <div class="stat">Рост: <strong>${w.growth}</strong></div>
+      <div class="stat">Собственность: <strong>${w.own}</strong></div>
+      <div class="heat-bar"><div class="heat-fill" style="width:${w.score}%;background:${w.color}"></div></div>
+      <div style="font-size:.7rem;color:var(--text3);margin-top:.3rem">Привлекательность: ${w.score}/100</div>
+    </div>
+  `).join('');
+}
+
+// ======================== EVENT HANDLERS ========================
+function updateLabels() {
+  document.getElementById('budgetVal').textContent = '$' + document.getElementById('budget').value + 'K';
+  document.getElementById('horizonVal').textContent = document.getElementById('horizon').value + ' лет';
+  document.getElementById('targetVal').textContent = document.getElementById('target').value + '% год';
+  const effortLabels = ['','Автопилот','Минимум','Умеренно','Активно','Полное погружение'];
+  document.getElementById('effortVal').textContent = effortLabels[document.getElementById('effort').value];
+}
+
+document.querySelectorAll('#riskBtns .risk-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#riskBtns .risk-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentRisk = +btn.dataset.v;
+    renderResults();
+  });
+});
+
+document.querySelectorAll('#ownerBtns .risk-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#ownerBtns .risk-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentOwner = btn.dataset.v;
+    renderResults();
+  });
+});
+
+['budget','horizon','target','effort'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => { updateLabels(); renderResults(); });
+});
+
+function resetFilters() {
+  document.getElementById('budget').value = 200;
+  document.getElementById('horizon').value = 5;
+  document.getElementById('target').value = 8;
+  document.getElementById('effort').value = 2;
+  currentRisk = 2;
+  currentOwner = 'any';
+  document.querySelectorAll('#riskBtns .risk-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('#riskBtns .risk-btn[data-v="2"]').classList.add('active');
+  document.querySelectorAll('#ownerBtns .risk-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('#ownerBtns .risk-btn[data-v="any"]').classList.add('active');
+  updateLabels();
+  renderResults();
+}
+
+// ======================== INIT ========================
+updateLabels();
+renderResults();
+renderDistricts();
+renderWorldComparison();
+
+// Smooth active nav
+const sections = document.querySelectorAll('section, [id]');
+const navLinks = document.querySelectorAll('nav .links a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => { if (s.offsetTop - 100 <= window.scrollY) current = s.id; });
+  navLinks.forEach(l => {
+    l.classList.remove('active');
+    if (l.getAttribute('href') === '#' + current) l.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
